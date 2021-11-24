@@ -297,13 +297,64 @@ class ChemicalBalancing {
         if(!this.NoxList[`${atom}`]) return "x";
         return this.NoxList[`${atom}`];
     }
-    getAtomIndex(group,atom) { // Group --> Reagente / Produto.
-        
+    getAtomIndex(group,elem,elemIndex,atom) { // Group --> Reagente / Produto.
+        let index = -1;
+
+        // Contexto
+        /*Nao terminado, resultados nao condizentes. O resultado aqui sera usado na funcao "NoxSolveds()"*/
+        /*
+            Como ?:
+            o atom que tem repeticao ira apontar para uma Key com uma value do tipo array, a posicao do real nox do atom
+            em questao sera o index, engenhoso ne, obrigado kk, calma... eu estou falando sozinho? aff... esse projeto
+            nao esta me fazendo bem ;D
+        */
+
+        group.forEach(_elem => {
+            const eachAtom = _elem.split("");
+            
+            if(_elem == elem){
+                for(let i=0;i<=elemIndex;i++) {
+                    const currentValue = eachAtom[i];
+                    const nextValue = eachAtom[i+1];
+    
+                    if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
+                        if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
+                            const _atom = `${currentValue}${nextValue}`;
+                            if(_atom === atom) index++;
+                        } else {
+                            const _atom = `${currentValue}`;
+                            if(_atom === atom) index++;
+                        }
+                    }
+                }
+            } else {
+                for(let i=0;i<eachAtom.length;i++) {
+                    const currentValue = eachAtom[i];
+                    const nextValue = eachAtom[i+1];
+    
+                    if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
+                        if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
+                            const _atom = `${currentValue}${nextValue}`;
+                            if(_atom === atom) index++;
+                        } else {
+                            const _atom = `${currentValue}`;
+                            if(_atom === atom) index++;
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log(index);
+        return index;
     }
 }
 
 const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+H2O");
 firstQuestion.CalcAtomsAndThemNox();
+console.log();
+console.log();
+firstQuestion.getAtomIndex(firstQuestion.products,"ClO2",0,"Cl"); // Grupo / Elem. / Elem.(Idx) / atom
 // firstQuestion.getAtomIndex();
 
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
