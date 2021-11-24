@@ -83,22 +83,21 @@ class ChemicalBalancing {
 
                             reagentsAndThemNox[`${atom}`].push(oldNox);
                             reagentsAndThemNox[`${atom}`].push(atomNox);
-                            console.log("asasdddsd");
                         } else {
                             reagentsAndThemNox[`${atom}`] = atomNox;
                         }
-                        return;
-                    }
-
-                    const atom = `${currentValue}`;
-                    const atomNox = this.getNox(elem,atom);
-                    if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
-                        const oldNox = reagentsAndThemNox[`${atom}`];
-                        reagentsAndThemNox[`${atom}`] = [];
-                        reagentsAndThemNox[`${atom}`].push(oldNox);
-                        reagentsAndThemNox[`${atom}`].push(atomNox);
                     } else {
-                        reagentsAndThemNox[`${atom}`] = atomNox;
+                        const atom = `${currentValue}`;
+                        const atomNox = this.getNox(elem,atom);
+    
+                        if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
+                            const oldNox = reagentsAndThemNox[`${atom}`];
+                            reagentsAndThemNox[`${atom}`] = [];
+                            reagentsAndThemNox[`${atom}`].push(oldNox);
+                            reagentsAndThemNox[`${atom}`].push(atomNox);
+                        } else {
+                            reagentsAndThemNox[`${atom}`] = atomNox;
+                        }
                     }
                 }
             }
@@ -121,28 +120,31 @@ class ChemicalBalancing {
 
                             productsAndThemNox[`${atom}`].push(oldNox);
                             productsAndThemNox[`${atom}`].push(atomNox);
-                            console.log("asasdddsd");
                         } else {
                             productsAndThemNox[`${atom}`] = atomNox;
                         }
-                        return;
-                    }
-
-                    const atom = `${currentValue}`;
-                    const atomNox = this.getNox(elem,atom);
-                    if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
-                        const oldNox = productsAndThemNox[`${atom}`];
-                        productsAndThemNox[`${atom}`] = [];
-                        productsAndThemNox[`${atom}`].push(oldNox);
-                        productsAndThemNox[`${atom}`].push(atomNox);
                     } else {
-                        productsAndThemNox[`${atom}`] = atomNox;
+                        const atom = `${currentValue}`;
+                        const atomNox = this.getNox(elem,atom);
+    
+                        if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
+                            const oldNox = productsAndThemNox[`${atom}`];
+                            productsAndThemNox[`${atom}`] = [];
+                            productsAndThemNox[`${atom}`].push(oldNox);
+                            productsAndThemNox[`${atom}`].push(atomNox);
+                        } else {
+                            productsAndThemNox[`${atom}`] = atomNox;
+                        }
                     }
                 }
             }
         })
 
-        console.log(reagentsAndThemNox,productsAndThemNox);
+        console.log(this.reagents);
+        console.log(this.products);
+        console.log();
+        console.log(reagentsAndThemNox);
+        console.log(productsAndThemNox);
 
         return { reagentsAndThemNox,productsAndThemNox };
     }
@@ -281,7 +283,7 @@ class ChemicalBalancing {
     }
 }
 
-const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+H2O");
+const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
 firstQuestion.CalcAtomsAndThemNox();
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
