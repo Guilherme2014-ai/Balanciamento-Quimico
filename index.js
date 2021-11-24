@@ -52,148 +52,97 @@ class ChemicalBalancing {
         const { reagentsEquationSolved, productsEquationSolved } = this.NoxSolveds(reagentsAndThemNox,productsAndThemNox); // Calculla os nox com "x", nox nao resolvidos, devolve um array com todos os valores calculados.
         const { reagentsAndThemNoxComplete, productsAndThemNoxComplete } = this.insertMissingNox(reagentsAndThemNox,productsAndThemNox,reagentsEquationSolved,productsEquationSolved);
         // substituir os "x" pelo valor.
-        
-        console.log(reagentsAndThemNox,productsAndThemNox);
-        console.log();
-        console.log(reagentsAndThemNoxComplete,productsAndThemNoxComplete);
-        
+
+        this.showResults(reagentsAndThemNox,productsAndThemNox,reagentsAndThemNoxComplete,productsAndThemNoxComplete);
     }
     
     CalcAtomsAndThemNox() {
-        const reagentsAndThemNox = {}, productsAndThemNox= {};
+        const reagentsAndThemNox = {}, productsAndThemNox = {}; // Syntax Expected: { C: 0, H: 1, N: 'x', O: -2 }
+        // this.reagents: [ 'C', 'HNO3' ] separado por "+"
 
-        // Necessita Reviso ! (Explicacao na ultima linha.)
+        /* OBS
+        quando o atomo se repete dentro do mesmo reagente/produto, e feito um array para armazenar os valores
+        conforme o planejado, oque resta e adpetar o resto do script para tal mudanca.\
+        */
+
         this.reagents.forEach(elem => {
-            const separetedAtoms = elem.split("");
+            const eachAtom = elem.split("");
 
-            if(separetedAtoms.length == 1) {
-                if(reagentsAndThemNox[`${separetedAtoms[0]}`] && reagentsAndThemNox[`${separetedAtoms[0]}`] != 0) {
-                    if(typeof reagentsAndThemNox[`${separetedAtoms[0]}`] == "number") {
-                        reagentsAndThemNox[`${separetedAtoms[0]}`].push(0);
-                    }else {
-                        const oldValue = reagentsAndThemNox[`${separetedAtoms[0]}`];
-                        reagentsAndThemNox[`${separetedAtoms[0]}`] = [];
+            for(let i=0;i<eachAtom.length;i++){
+                const currentValue = eachAtom[i];
+                const nextValue = eachAtom[i+1];
 
-                        reagentsAndThemNox[`${separetedAtoms[0]}`].push(oldValue);
-                        reagentsAndThemNox[`${separetedAtoms[0]}`].push(0);
-                    }
-                } else {
-                    reagentsAndThemNox[`${separetedAtoms[0]}`] = 0;
-                }
-            } else {
-                for(let i=0;i<separetedAtoms.length;i++) {
-                    let atom = separetedAtoms[i];
-                    const nextAtom = separetedAtoms[i+1];
+                if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
+                    if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
+                        const atom = `${currentValue}${nextValue}`;
+                        const atomNox = this.getNox(elem,atom);
 
-                    if(!this.isThisAtomANumber(atom)) {
-                        if(this.isUpperCase(atom)) {
-                            if(nextAtom) {
-                                if(!this.isUpperCase(nextAtom) && !this.isThisAtomANumber(nextAtom)) atom = `${atom}${nextAtom}`;
-                                const atomNox = this.NoxList[`${atom}`];
-    
-                                if(atomNox) {
-                                    if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
-                                        if(typeof reagentsAndThemNox[`${atom}` == "object"]) {
-                                            reagentsAndThemNox[`${atom}`].push(atomNox);
-                                        } else {
-                                            const oldValue = reagentsAndThemNox;
-        
-                                            reagentsAndThemNox[`${atom}`] = [];
-        
-                                            reagentsAndThemNox[`${atom}`].push(oldValue);
-                                            reagentsAndThemNox[`${atom}`].push(atomNox);
-                                        }
-                                    } else {
-                                        reagentsAndThemNox[`${atom}`] = atomNox
-                                    }
-                                } else {
-                                    if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != "x") {
-                                        if(typeof reagentsAndThemNox[`${atom}` == "object"]) {
-                                            reagentsAndThemNox[`${atom}`].push("x");
-                                        } else {
-                                            const oldValue = reagentsAndThemNox;
-        
-                                            reagentsAndThemNox[`${atom}`] = [];
-        
-                                            reagentsAndThemNox[`${atom}`].push(oldValue);
-                                            reagentsAndThemNox[`${atom}`].push("x");
-                                        }
-                                    } else {
-                                        reagentsAndThemNox[`${atom}`] = "x";
-                                    }
-                                }
-                            }
+                        if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
+                            const oldNox = reagentsAndThemNox[`${atom}`];
+                            reagentsAndThemNox[`${atom}`] = [];
+
+                            reagentsAndThemNox[`${atom}`].push(oldNox);
+                            reagentsAndThemNox[`${atom}`].push(atomNox);
+                            console.log("asasdddsd");
+                        } else {
+                            reagentsAndThemNox[`${atom}`] = atomNox;
                         }
+                        return;
+                    }
+
+                    const atom = `${currentValue}`;
+                    const atomNox = this.getNox(elem,atom);
+                    if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
+                        const oldNox = reagentsAndThemNox[`${atom}`];
+                        reagentsAndThemNox[`${atom}`] = [];
+                        reagentsAndThemNox[`${atom}`].push(oldNox);
+                        reagentsAndThemNox[`${atom}`].push(atomNox);
+                    } else {
+                        reagentsAndThemNox[`${atom}`] = atomNox;
                     }
                 }
             }
         })
-        this.products.forEach(elem => { 
-            const separetedAtoms = elem.split("");
+        this.products.forEach(elem => {
+            const eachAtom = elem.split("");
 
-            if(separetedAtoms.length == 1) {
-                if(productsAndThemNox[`${separetedAtoms[0]}`] && productsAndThemNox[`${separetedAtoms[0]}`] != 0) {
-                    if(typeof productsAndThemNox[`${separetedAtoms[0]}`] == "number") {
-                        productsAndThemNox[`${separetedAtoms[0]}`].push(0);
-                    }else {
-                        const oldValue = productsAndThemNox[`${separetedAtoms[0]}`];
-                        productsAndThemNox[`${separetedAtoms[0]}`] = [];
+            for(let i=0;i<eachAtom.length;i++){
+                const currentValue = eachAtom[i];
+                const nextValue = eachAtom[i+1];
 
-                        productsAndThemNox[`${separetedAtoms[0]}`].push(oldValue);
-                        productsAndThemNox[`${separetedAtoms[0]}`].push(0);
-                    }
-                } else {
-                    productsAndThemNox[`${separetedAtoms[0]}`] = 0;
-                }
-            } else {
-                for(let i=0;i<separetedAtoms.length;i++) {
-                    let atom = separetedAtoms[i];
-                    const nextAtom = separetedAtoms[i+1];
+                if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
+                    if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
+                        const atom = `${currentValue}${nextValue}`;
+                        const atomNox = this.getNox(elem,atom);
 
-                    if(!this.isThisAtomANumber(atom)) {
-                        if(this.isUpperCase(atom)) {
-                            if(nextAtom) {
-                                if(!this.isUpperCase(nextAtom) && !this.isThisAtomANumber(nextAtom)) atom = `${atom}${nextAtom}`;
-                                const atomNox = this.NoxList[`${atom}`];
-    
-                                if(atomNox) {
-                                    if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
-                                        if(typeof productsAndThemNox[`${atom}` == "object"]) {
-                                            productsAndThemNox[`${atom}`].push(atomNox);
-                                        } else {
-                                            const oldValue = productsAndThemNox;
-        
-                                            productsAndThemNox[`${atom}`] = [];
-        
-                                            productsAndThemNox[`${atom}`].push(oldValue);
-                                            productsAndThemNox[`${atom}`].push(atomNox);
-                                        }
-                                    } else {
-                                        productsAndThemNox[`${atom}`] = atomNox
-                                    }
-                                } else {
-                                    if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != "x") {
-                                        if(typeof productsAndThemNox[`${atom}` == "object"]) {
-                                            productsAndThemNox[`${atom}`].push("x");
-                                        } else {
-                                            const oldValue = productsAndThemNox;
-        
-                                            productsAndThemNox[`${atom}`] = [];
-        
-                                            productsAndThemNox[`${atom}`].push(oldValue);
-                                            productsAndThemNox[`${atom}`].push("x");
-                                        }
-                                    } else {
-                                        productsAndThemNox[`${atom}`] = "x";
-                                    }
-                                }
-                            }
+                        if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
+                            const oldNox = productsAndThemNox[`${atom}`];
+                            productsAndThemNox[`${atom}`] = [];
+
+                            productsAndThemNox[`${atom}`].push(oldNox);
+                            productsAndThemNox[`${atom}`].push(atomNox);
+                            console.log("asasdddsd");
+                        } else {
+                            productsAndThemNox[`${atom}`] = atomNox;
                         }
+                        return;
+                    }
+
+                    const atom = `${currentValue}`;
+                    const atomNox = this.getNox(elem,atom);
+                    if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
+                        const oldNox = productsAndThemNox[`${atom}`];
+                        productsAndThemNox[`${atom}`] = [];
+                        productsAndThemNox[`${atom}`].push(oldNox);
+                        productsAndThemNox[`${atom}`].push(atomNox);
+                    } else {
+                        productsAndThemNox[`${atom}`] = atomNox;
                     }
                 }
             }
         })
-        //
+
+        console.log(reagentsAndThemNox,productsAndThemNox);
 
         return { reagentsAndThemNox,productsAndThemNox };
     }
@@ -315,10 +264,25 @@ class ChemicalBalancing {
 
         return obj;
     }
+    showResults(reagentsAndThemNox,productsAndThemNox,reagentsAndThemNoxComplete,productsAndThemNoxComplete) {
+        console.log();
+        console.log("-------------------------------------------------------------");
+        console.log();
+        console.log(reagentsAndThemNox,productsAndThemNox);
+        console.log(reagentsAndThemNoxComplete,productsAndThemNoxComplete);
+        console.log();
+        console.log("-------------------------------------------------------------");
+        console.log();
+    }
+    getNox(elem,atom) {
+        if(elem.length === atom.length) return 0;
+        if(!this.NoxList[`${atom}`]) return "x";
+        return this.NoxList[`${atom}`];
+    }
 }
 
-const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
-firstQuestion.Handle();
+const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+H2O");
+firstQuestion.CalcAtomsAndThemNox();
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
 
