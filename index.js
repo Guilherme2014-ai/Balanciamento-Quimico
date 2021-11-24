@@ -49,7 +49,7 @@ class ChemicalBalancing {
         //console.log(this.reagents);
         //console.log(this.products);
         const { reagentsAndThemNox, productsAndThemNox } = this.CalcAtomsAndThemNox(); // Atribui todo os nox aos atomos de acordo com a tabela, caso nao esteja presente na tabela recebe "x".
-        const { reagentsEquationSolved, productsEquationSolved } = this.NoxSolveds(reagentsAndThemNox,productsAndThemNox); // Calculla os nox com "x", nox nao resolvidos, devolve um array com todos os valores calculados.
+        const { reagentsEquationSolved, productsEquationSolved } = this.NoxSolveds(reagentsAndThemNox,productsAndThemNox); // Calcula os nox com "x", nox nao resolvidos, devolve um array com todos os valores calculados.
         const { reagentsAndThemNoxComplete, productsAndThemNoxComplete } = this.insertMissingNox(reagentsAndThemNox,productsAndThemNox,reagentsEquationSolved,productsEquationSolved);
         // substituir os "x" pelo valor.
 
@@ -79,10 +79,15 @@ class ChemicalBalancing {
 
                         if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
                             const oldNox = reagentsAndThemNox[`${atom}`];
-                            reagentsAndThemNox[`${atom}`] = [];
 
-                            reagentsAndThemNox[`${atom}`].push(oldNox);
-                            reagentsAndThemNox[`${atom}`].push(atomNox);
+                            if(typeof oldNox == "object") {
+                                if(!oldNox.includes(atomNox)) reagentsAndThemNox[`${atom}`].push(atomNox);
+                            } else {
+                                reagentsAndThemNox[`${atom}`] = [];
+
+                                reagentsAndThemNox[`${atom}`].push(oldNox);
+                                reagentsAndThemNox[`${atom}`].push(atomNox);
+                            }
                         } else {
                             reagentsAndThemNox[`${atom}`] = atomNox;
                         }
@@ -116,10 +121,15 @@ class ChemicalBalancing {
 
                         if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
                             const oldNox = productsAndThemNox[`${atom}`];
-                            productsAndThemNox[`${atom}`] = [];
 
-                            productsAndThemNox[`${atom}`].push(oldNox);
-                            productsAndThemNox[`${atom}`].push(atomNox);
+                            if(typeof oldNox == "object") {
+                                if(!oldNox.includes(atomNox)) productsAndThemNox[`${atom}`].push(atomNox);
+                            } else {
+                                productsAndThemNox[`${atom}`] = [];
+
+                                productsAndThemNox[`${atom}`].push(oldNox);
+                                productsAndThemNox[`${atom}`].push(atomNox);
+                            }
                         } else {
                             productsAndThemNox[`${atom}`] = atomNox;
                         }
@@ -146,21 +156,17 @@ class ChemicalBalancing {
         console.log(reagentsAndThemNox);
         console.log(productsAndThemNox);
 
+        // test
+        this.NoxSolveds(reagentsAndThemNox,productsAndThemNox);
+        //
+
         return { reagentsAndThemNox,productsAndThemNox };
     }
-    SolveSimpleEquations(equation) {
-        equation = equation.split("=")[0];
-        const equationNumbers = [];
-    
-        for(let i=0;i<equation.length;i++) {
-            const currentValue = equation[i], beforeValue = equation[i-1];
-            if(currentValue != "x" && currentValue != "+" && currentValue != "-") !beforeValue || beforeValue == "+" ? equationNumbers.push(Number(currentValue)) : equationNumbers.push((Number(currentValue) * (-1)));
-        }
-        return equationNumbers.reduce((accumulated, currentValue) => accumulated + currentValue)*(-1);
-    }
-    NoxSolveds(reagentsNox, productsNox) {
+    NoxSolveds(reagentsNox, productsNox) { // parametros recebidos de "CalcAtomsAndThemNox()"
         const reagents = [...this.reagents];
         const products = [...this.products];
+
+        console.log(reagentsNox,productsNox);
 
         const reagentsEquation = reagents.map(elem => {
             const atoms = elem.split("");
@@ -176,7 +182,7 @@ class ChemicalBalancing {
                     } else {
                         equation.push(reagentsNox[`${currentValue}`]);
                     }
-                }else{}
+                }
             }
             for(let i=0;i<equation.length;i++) {
                 const currentValue = equation[i], nextValue = equation[i+1];
@@ -216,6 +222,16 @@ class ChemicalBalancing {
             reagentsEquationSolved: reagentsEquationSolved.filter(elem => typeof elem == "number"),
             productsEquationSolved: productsEquationSolved.filter(elem => typeof elem == "number")
         };
+    }
+    SolveSimpleEquations(equation) {
+        equation = equation.split("=")[0];
+        const equationNumbers = [];
+    
+        for(let i=0;i<equation.length;i++) {
+            const currentValue = equation[i], beforeValue = equation[i-1];
+            if(currentValue != "x" && currentValue != "+" && currentValue != "-") !beforeValue || beforeValue == "+" ? equationNumbers.push(Number(currentValue)) : equationNumbers.push((Number(currentValue) * (-1)));
+        }
+        return equationNumbers.reduce((accumulated, currentValue) => accumulated + currentValue)*(-1);
     }
 
     
@@ -281,10 +297,15 @@ class ChemicalBalancing {
         if(!this.NoxList[`${atom}`]) return "x";
         return this.NoxList[`${atom}`];
     }
+    getAtomIndex(group,atom) { // Group --> Reagente / Produto.
+        
+    }
 }
 
-const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
+const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+H2O");
 firstQuestion.CalcAtomsAndThemNox();
+// firstQuestion.getAtomIndex();
+
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
 
@@ -295,8 +316,9 @@ Vai ser feito primeiro um script sem a opcao de fazer balanceamento com 2 atomos
 for testado, sera feito um update para o novo com esta opcao inclusa.
 
     Anotacoes sobre:
-        Erros a Serem Corrigidos:
-            1 - Selecao de elemenros com mais de duas letras --> talvez consertado.
-            2 - Dois elementos no mesmo Reagente/Produto --> necessita de conserto.
-            3 - X maior que 1.
+        Erros:
+            1 - Selecao de elemenros com mais de duas letras --> ✔.
+            2 - Dois elementos no mesmo Reagente/Produto --> ...
+            3 - "X" maior que 1. --> X
+            4 - nox dependentes de outros atomos. --> X
 */
