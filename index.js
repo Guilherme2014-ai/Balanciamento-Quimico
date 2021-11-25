@@ -72,37 +72,23 @@ class ChemicalBalancing {
                 const currentValue = eachAtom[i];
                 const nextValue = eachAtom[i+1];
 
-                if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
-                    if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
-                        const atom = `${currentValue}${nextValue}`;
-                        const atomNox = this.getNox(elem,atom);
+                if(this.isUpperCase(currentValue) && !this.isThisAtomANumber(currentValue)) {
+                    const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
+                    const atomNox = this.getNox(elem,atom);
 
-                        if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
-                            const oldNox = reagentsAndThemNox[`${atom}`];
+                    if(reagentsAndThemNox[`${atom}`]) {
+                        const oldNox = reagentsAndThemNox[`${atom}`];
 
-                            if(typeof oldNox == "object") {
-                                if(!oldNox.includes(atomNox)) reagentsAndThemNox[`${atom}`].push(atomNox);
-                            } else {
-                                reagentsAndThemNox[`${atom}`] = [];
-
-                                reagentsAndThemNox[`${atom}`].push(oldNox);
-                                reagentsAndThemNox[`${atom}`].push(atomNox);
-                            }
-                        } else {
-                            reagentsAndThemNox[`${atom}`] = atomNox;
-                        }
-                    } else {
-                        const atom = `${currentValue}`;
-                        const atomNox = this.getNox(elem,atom);
-    
-                        if(reagentsAndThemNox[`${atom}`] && reagentsAndThemNox[`${atom}`] != atomNox) {
-                            const oldNox = reagentsAndThemNox[`${atom}`];
-                            reagentsAndThemNox[`${atom}`] = [];
-                            reagentsAndThemNox[`${atom}`].push(oldNox);
+                        if(typeof oldNox == "object") {
                             reagentsAndThemNox[`${atom}`].push(atomNox);
                         } else {
-                            reagentsAndThemNox[`${atom}`] = atomNox;
+                            reagentsAndThemNox[`${atom}`] = [];
+
+                            reagentsAndThemNox[`${atom}`].push(oldNox);
+                            reagentsAndThemNox[`${atom}`].push(atomNox);
                         }
+                    } else {
+                        reagentsAndThemNox[`${atom}`] = atomNox;
                     }
                 }
             }
@@ -114,114 +100,70 @@ class ChemicalBalancing {
                 const currentValue = eachAtom[i];
                 const nextValue = eachAtom[i+1];
 
-                if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
-                    if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
-                        const atom = `${currentValue}${nextValue}`;
-                        const atomNox = this.getNox(elem,atom);
+                if(this.isUpperCase(currentValue) && !this.isThisAtomANumber(currentValue)) {
+                    const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
+                    const atomNox = this.getNox(elem,atom);
 
-                        if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
-                            const oldNox = productsAndThemNox[`${atom}`];
+                    if(productsAndThemNox[`${atom}`]) {
+                        const oldNox = productsAndThemNox[`${atom}`];
 
-                            if(typeof oldNox == "object") {
-                                if(!oldNox.includes(atomNox)) productsAndThemNox[`${atom}`].push(atomNox);
-                            } else {
-                                productsAndThemNox[`${atom}`] = [];
-
-                                productsAndThemNox[`${atom}`].push(oldNox);
-                                productsAndThemNox[`${atom}`].push(atomNox);
-                            }
-                        } else {
-                            productsAndThemNox[`${atom}`] = atomNox;
-                        }
-                    } else {
-                        const atom = `${currentValue}`;
-                        const atomNox = this.getNox(elem,atom);
-    
-                        if(productsAndThemNox[`${atom}`] && productsAndThemNox[`${atom}`] != atomNox) {
-                            const oldNox = productsAndThemNox[`${atom}`];
-                            productsAndThemNox[`${atom}`] = [];
-                            productsAndThemNox[`${atom}`].push(oldNox);
+                        if(typeof oldNox == "object") {
                             productsAndThemNox[`${atom}`].push(atomNox);
                         } else {
-                            productsAndThemNox[`${atom}`] = atomNox;
+                            productsAndThemNox[`${atom}`] = [];
+
+                            productsAndThemNox[`${atom}`].push(oldNox);
+                            productsAndThemNox[`${atom}`].push(atomNox);
                         }
+                    } else {
+                        productsAndThemNox[`${atom}`] = atomNox;
                     }
                 }
             }
         })
 
-        console.log(this.reagents);
-        console.log(this.products);
-        console.log();
-        console.log(reagentsAndThemNox);
-        console.log(productsAndThemNox);
-
         // test
-        this.NoxSolveds(reagentsAndThemNox,productsAndThemNox);
+        this.NoxSolveds(reagentsAndThemNox,productsAndThemNox); // esta funcao deve ser chamada no metodo Handle, porem esta aqui para testes.
         //
-
+        console.log(reagentsAndThemNox,productsAndThemNox);
         return { reagentsAndThemNox,productsAndThemNox };
     }
-    NoxSolveds(reagentsNox, productsNox) { // parametros recebidos de "CalcAtomsAndThemNox()"
+    NoxSolveds(reagentsNox, productsNox) { // parametros recebidos de "CalcAtomsAndThemNox()" // HERE
+        /*Contexto
+        Esta funcao monta a formula e devolve os nox resolvidos
+
+        Ja foi feito a alteracao dos nox em formato de array se necessario, e o metodo de localizacao do index de cada atom,
+        se nao fosse feito como saberia qual o nox pertencente a tal atom dentro do array ne ?
+
+        Oque precisa ser feito agr e calcular os nox"X" com os recursos acima.
+        */
+
+        // Problema acontecendo --> o noxAtom Array esta dando undefined, dando a entender q o index esta errado
         const reagents = [...this.reagents];
         const products = [...this.products];
 
-        console.log(reagentsNox,productsNox);
-
-        const reagentsEquation = reagents.map(elem => {
+        const reagentsFormula = reagents.map(elem => {
             const atoms = elem.split("");
-            const equation = [];
+            let formula = [];
 
             for(let i=0;i<atoms.length;i++) {
-                const currentValue = atoms[i];
-                const nextValue = atoms[i+1];
+                const currentValue = atoms[i], nextValue = atoms[i+1];
 
-                if(!this.isThisAtomANumber(currentValue)) {
-                    if(this.isThisAtomANumber(nextValue)) {
-                        equation.push(reagentsNox[`${currentValue}`]*nextValue);
+                if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
+                    const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
+                    const noxAtom = reagentsNox[`${atom}`];
+
+                    if(typeof noxAtom == "object") {
+                        const atomIndex = this.getAtomIndex(this.reagents,elem,i);
+                        formula.push(`${noxAtom[atomIndex]}`);
                     } else {
-                        equation.push(reagentsNox[`${currentValue}`]);
+                        formula.push(`${noxAtom}`);
                     }
-                }
-            }
-            for(let i=0;i<equation.length;i++) {
-                const currentValue = equation[i], nextValue = equation[i+1];
-                if(nextValue > 0 || nextValue == "x" && nextValue != undefined) equation[i] = `${currentValue}+`
+                };
             }
 
-            return `${equation.join("")}=0`;
-        })
-        const productsEquation = products.map(elem => {
-            const atoms = elem.split("");
-            const equation = [];
-
-            for(let i=0;i<atoms.length;i++) {
-                const currentValue = atoms[i];
-                const nextValue = atoms[i+1];
-
-                if(!this.isThisAtomANumber(currentValue)) {
-                    if(this.isThisAtomANumber(nextValue)) {
-                        equation.push(productsNox[`${currentValue}`]*nextValue);
-                    } else {
-                        equation.push(productsNox[`${currentValue}`]);
-                    }
-                }else{}
-            }
-            for(let i=0;i<equation.length;i++) {
-                const currentValue = equation[i], nextValue = equation[i+1];
-                if(nextValue > 0 || nextValue == "x" && nextValue != undefined) equation[i] = `${currentValue}+`
-            }
-
-            return `${equation.join("")}=0`;
-        })
-
-        const reagentsEquationSolved = reagentsEquation.map(_equation => _equation.includes("x") ? this.SolveSimpleEquations(_equation) : _equation);
-        const productsEquationSolved = productsEquation.map(_equation => _equation.includes("x") ? this.SolveSimpleEquations(_equation) : _equation);
-
-        return {
-            reagentsEquationSolved: reagentsEquationSolved.filter(elem => typeof elem == "number"),
-            productsEquationSolved: productsEquationSolved.filter(elem => typeof elem == "number")
-        };
+            return formula;
+        });
     }
     SolveSimpleEquations(equation) {
         equation = equation.split("=")[0];
@@ -352,17 +294,13 @@ class ChemicalBalancing {
             }
         });
 
-        console.log(finalIndex);
         return finalIndex;
     }
 }
 
 const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+H2O");
 firstQuestion.CalcAtomsAndThemNox();
-console.log();
-console.log();
-firstQuestion.getAtomIndex(firstQuestion.products,"Na2SO4",4,"O"); // Grupo / Elem. / Elem.(Idx) / atom
-// firstQuestion.getAtomIndex();
+// firstQuestion.getAtomIndex(firstQuestion.products,"Na2SO4",4,"O"); // Grupo / Elem. / Elem.(Idx) / atom
 
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
