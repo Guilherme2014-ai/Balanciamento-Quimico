@@ -299,6 +299,7 @@ class ChemicalBalancing {
     }
     getAtomIndex(group,elem,elemIndex,atom) { // Group --> Reagente / Produto.
         let index = -1;
+        let finalIndex = -1;
 
         // Contexto
         /*Nao terminado, resultados nao condizentes. O resultado aqui sera usado na funcao "NoxSolveds()"*/
@@ -320,10 +321,16 @@ class ChemicalBalancing {
                     if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
                         if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
                             const _atom = `${currentValue}${nextValue}`;
-                            if(_atom === atom) index++;
+                            if(_atom === atom) {
+                                index++;
+                                finalIndex = index;
+                            };
                         } else {
                             const _atom = `${currentValue}`;
-                            if(_atom === atom) index++;
+                            if(_atom === atom) {
+                                index++;
+                                finalIndex = index;
+                            };
                         }
                     }
                 }
@@ -345,8 +352,8 @@ class ChemicalBalancing {
             }
         });
 
-        console.log(index);
-        return index;
+        console.log(finalIndex);
+        return finalIndex;
     }
 }
 
@@ -354,7 +361,7 @@ const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+
 firstQuestion.CalcAtomsAndThemNox();
 console.log();
 console.log();
-firstQuestion.getAtomIndex(firstQuestion.products,"ClO2",0,"Cl"); // Grupo / Elem. / Elem.(Idx) / atom
+firstQuestion.getAtomIndex(firstQuestion.products,"Na2SO4",4,"O"); // Grupo / Elem. / Elem.(Idx) / atom
 // firstQuestion.getAtomIndex();
 
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
