@@ -4,6 +4,8 @@
 // 4 Passo - Calcular o delta Nox de ambos.
 // 5 Passo - Substituir os Delta nox e fazer o metodo de tentativas.
 
+// Checkpoint atualizar a func. Insert MissingNox.
+
 class ChemicalBalancing {
 
     constructor(unbalancedEquation){
@@ -39,14 +41,13 @@ class ChemicalBalancing {
         this.products = unbalancedEquation.split("-->")[1].split("+");
     }
     Handle() {
+        console.log(this.reagents,this.products);
+
         const { reagentsAndThemNoxWithX, productsAndThemNoxWithNX } = this.CalcAtomsAndThemNox(); // Atribui todo os nox aos atomos de acordo com a tabela, caso nao esteja presente na tabela recebe "x".
         const { reagentsFormulaSolved, productsFormulaSolved } = this.NoxSolveds(reagentsAndThemNoxWithX,productsAndThemNoxWithNX); // Calcula os nox com "x", nox nao resolvidos, devolve um array com todos os valores calculados.
         const { reagentsAndThemNoxWithXComplete, productsAndThemNoxWithNXComplete } = this.insertMissingNox(reagentsAndThemNoxWithX,productsAndThemNoxWithNX,reagentsFormulaSolved,productsFormulaSolved); // substituir os "x" pelo valor.
 
-        // console.log(this.reagents,this.products);
-        // this.showResults(reagentsFormulaSolved,productsFormulaSolved,reagentsAndThemNoxWithXComplete,productsAndThemNoxWithNXComplete);
-
-        console.log("Calma !");
+        this.showResults(reagentsFormulaSolved,productsFormulaSolved,reagentsAndThemNoxWithXComplete,productsAndThemNoxWithNXComplete);
     }
     
     CalcAtomsAndThemNox() {
@@ -118,7 +119,7 @@ class ChemicalBalancing {
 
         const reagentsAndThemNoxWithX_zeroBugSolved = this.ArrayToJson(Object.entries(reagentsAndThemNoxWithX).map(e => {
             if(typeof e[1] == "object") {
-                e[1] = e[1].map(b => Number(b))
+                e[1] = e[1].map(b => b != "x" ? Number(b) : b);
                 return e;
             } else {
                 return e;
@@ -126,13 +127,14 @@ class ChemicalBalancing {
         }));
         const productsAndThemNoxWithNX_zeroBugSolved = this.ArrayToJson(Object.entries(productsAndThemNoxWithNX).map(e => {
             if(typeof e[1] == "object") {
-                e[1] = e[1].map(b => Number(b))
+                e[1] = e[1].map(b => b != "x" ? Number(b) : b);
                 return e;
             } else {
                 return e;
             }
         }));
         
+
         return {
             reagentsAndThemNoxWithX: reagentsAndThemNoxWithX_zeroBugSolved,
             productsAndThemNoxWithNX: productsAndThemNoxWithNX_zeroBugSolved
@@ -195,34 +197,61 @@ class ChemicalBalancing {
         return caracter.replace(/[A-Z]/,"_isUpper_") == caracter ? false : true;
     }
     insertMissingNox(reagents,products,missingNoxReag,missingNoxProd) {
+        // Arrumar
+        
         reagents = Object.entries(reagents);
         products = Object.entries(products);
 
         let i,j;
+        let u,t;
+
         let n = 0, k = 0;
 
         for(i=0;i<reagents.length;i++) {
             const atomAndHisNoxArr = reagents[i];
             const [ atom, nox ] = atomAndHisNoxArr;
 
-            if(nox == "x") {
-                reagents[i][1] = missingNoxReag[n];
-                n++
+            if(typeof nox == "object") {
+                for(u=0;u<nox.length;u++){
+                    const currentValue = reagents[i][u];
+
+                    if(currentValue == "x"){
+                        reagents[i][u] = missingNoxReag[n];
+                        n++;
+                    }
+                }
+            } else {
+                if(nox == "x") {
+                    reagents[i][1] = missingNoxReag[n];
+                    n++
+                }
             }
         }
-        for(j=0;j<products.length;j++) {
+
+        for(j=0;j<reagents.length;j++) {
             const atomAndHisNoxArr = products[j];
             const [ atom, nox ] = atomAndHisNoxArr;
 
-            if(nox == "x") {
-                products[j][1] = missingNoxProd[k];
-                k++
+            if(typeof nox == "object") {
+                for(t=0;t<nox.length;t++){
+                    const currentValue = products[j][t];
+
+                    if(currentValue == "x"){
+                        products[i][u] = missingNoxProd[k];
+                        k++;
+                    }
+                }
+            } else {
+                if(nox == "x") {
+                    products[j][1] = missingNoxProd[k];
+                    k++
+                }
             }
         }
 
         const reagentsAndThemNoxComplete = this.ArrayToJson(reagents);
         const productsAndThemNoxComplete = this.ArrayToJson(products);
-
+        
         return { reagentsAndThemNoxComplete,productsAndThemNoxComplete };
     }
     ArrayToJson(array) {
@@ -246,8 +275,7 @@ class ChemicalBalancing {
         console.log();
     }
     getNox(elem,atom) {
-        const zero = "0";
-        if(elem.length == atom.length) return zero; // a key sendo 0 o js reconhece como invalido/null...
+        if(elem.length == atom.length) return "0"; // a key sendo 0 o js reconhece como invalido/null...
         if(!this.NoxList[`${atom}`]) return "x";
         return this.NoxList[`${atom}`];
     }
@@ -348,7 +376,7 @@ class ChemicalBalancing {
             });
             return newnoxValues;
         }).map(formula => `${formula.join("")}=0`); // mais para frente fazer atualizacao para o suporte de ion na formula
-    }
+    }   
 }
 
 const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
@@ -366,7 +394,7 @@ for testado, sera feito um update para o novo com esta opcao inclusa.
     Anotacoes sobre:
         Erros:
             1 - Selecao de elemenros com mais de duas letras --> ✔.
+            3 - "X" maior que 1. --> ✔
             2 - Dois elementos no mesmo Reagente/Produto --> ...
-            3 - "X" maior que 1. --> X
             4 - nox dependentes de outros atomos. --> X
 */
