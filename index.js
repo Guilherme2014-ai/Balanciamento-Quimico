@@ -125,7 +125,6 @@ class ChemicalBalancing {
         // test
         this.NoxSolveds(reagentsAndThemNox,productsAndThemNox); // esta funcao deve ser chamada no metodo Handle, porem esta aqui para testes.
         //
-        console.log(reagentsAndThemNox,productsAndThemNox);
         return { reagentsAndThemNox,productsAndThemNox };
     }
     NoxSolveds(reagentsNox, productsNox) { // parametros recebidos de "CalcAtomsAndThemNox()" // HERE
@@ -138,32 +137,20 @@ class ChemicalBalancing {
         Oque precisa ser feito agr e calcular os nox"X" com os recursos acima.
         */
 
-        // Problema acontecendo --> o noxAtom Array esta dando undefined, dando a entender q o index esta errado
-        const reagents = [...this.reagents];
-        const products = [...this.products];
+        const reagents = [ ...this.reagents ];
+        const products = [ ...this.products ];
 
-        const reagentsFormula = reagents.map(elem => {
-            const atoms = elem.split("");
-            let formula = [];
+        const reagentsFormula = this.buildTheFormula(reagents,reagentsNox);
+        const productsFormula = this.buildTheFormula(products,productsNox);
 
-            for(let i=0;i<atoms.length;i++) {
-                const currentValue = atoms[i], nextValue = atoms[i+1];
+        console.log(this.reagents);
+        console.log(this.products);
 
-                if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
-                    const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
-                    const noxAtom = reagentsNox[`${atom}`];
+        console.log();
 
-                    if(typeof noxAtom == "object") {
-                        const atomIndex = this.getAtomIndex(this.reagents,elem,i);
-                        formula.push(`${noxAtom[atomIndex]}`);
-                    } else {
-                        formula.push(`${noxAtom}`);
-                    }
-                };
-            }
+        console.log(reagentsFormula);
+        console.log(productsFormula);
 
-            return formula;
-        });
     }
     SolveSimpleEquations(equation) {
         equation = equation.split("=")[0];
@@ -173,6 +160,7 @@ class ChemicalBalancing {
             const currentValue = equation[i], beforeValue = equation[i-1];
             if(currentValue != "x" && currentValue != "+" && currentValue != "-") !beforeValue || beforeValue == "+" ? equationNumbers.push(Number(currentValue)) : equationNumbers.push((Number(currentValue) * (-1)));
         }
+        
         return equationNumbers.reduce((accumulated, currentValue) => accumulated + currentValue)*(-1);
     }
 
@@ -296,11 +284,52 @@ class ChemicalBalancing {
 
         return finalIndex;
     }
+    buildTheFormula(group,groupNox) {
+        return group.map(elem => {
+            const atoms = elem.split("");
+            let formula = [];
+
+            for(let i=0;i<atoms.length;i++) {
+                const currentValue = atoms[i], nextValue = atoms[i+1];
+
+                if(this.isUpperCase(currentValue) && !this.isThisAtomANumber(currentValue)) {
+                    const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
+                    const noxAtom = groupNox[`${atom}`];
+
+                    if(typeof noxAtom == "object") {
+                        const atomIndex = this.getAtomIndex(group,elem,i,atom);
+                        if(this.isThisAtomANumber(nextValue)) {
+                            if(noxAtom[atomIndex] == "x") {
+                                formula.push(`${nextValue}x`);
+                            } else formula.push(`${noxAtom[atomIndex]*nextValue}`);
+                                                 
+                        } else formula.push(`${noxAtom[atomIndex]}`);
+                    } else {
+                        if(this.isThisAtomANumber(nextValue)) {
+                            if(noxAtom == "x") {
+                                formula.push(`${nextValue}x`);
+                            } else formula.push(`${noxAtom*nextValue}`);
+                                                 
+                        } else formula.push(`${noxAtom}`);
+                    }
+                };
+            }
+
+            return formula;
+        }).map(noxValues => {
+            const newnoxValues = noxValues.map(currentValue => {
+                const operation = currentValue.split("")[0] == "+" || currentValue.split("")[0] == "-";
+
+                return !operation ? `+${currentValue}` : currentValue;
+            });
+            return newnoxValues;
+        }).map(formula => `${formula.join("")}=0`); // mais para frente fazer atualizacao para o suporte de ion na formula
+    }
 }
 
-const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4+O-->HClO4+ClO2+Na2SO4+H2O");
+const firstQuestion = new ChemicalBalancing("C+HN2O3-->CO2+NO2+H2O");
 firstQuestion.CalcAtomsAndThemNox();
-// firstQuestion.getAtomIndex(firstQuestion.products,"Na2SO4",4,"O"); // Grupo / Elem. / Elem.(Idx) / atom
+// firstQuestion.getAtomIndex(firstQuestion.products,"ClO2",0,"Cl") // Grupo / Elem. / Elem.(Idx) / atom
 
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
