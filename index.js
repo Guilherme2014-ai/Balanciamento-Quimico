@@ -20,7 +20,6 @@ class ChemicalBalancing {
         this.NoxList = {
             "I": -1,
             "Br": -1,
-            "Cl": -1,
             "F": -1,
 
             "S": -2,
@@ -57,10 +56,13 @@ class ChemicalBalancing {
         const { reagentsAndThemNoxWithXComplete, productsAndThemNoxWithNXComplete } = this.insertMissingNox(reagentsAndThemNoxWithX,productsAndThemNoxWithNX,reagentsFormulaSolved,productsFormulaSolved); // substituir os "x" pelo valor.
 
         this.showResults([
+            "Reagentes e Produtos sem calcular seus Nox's:",
             reagentsAndThemNoxWithX,
             productsAndThemNoxWithNX,
             null,
-            reagentsAndThemNoxWithXComplete,productsAndThemNoxWithNXComplete
+            "Reagentes e Produtos com seus Nox's Calculados:",
+            reagentsAndThemNoxWithXComplete,
+            productsAndThemNoxWithNXComplete
         ]);
     }
      
@@ -171,9 +173,6 @@ class ChemicalBalancing {
         const reagentsOrganized = this.organizeAtoms(reagents, reagentsNox);
         const productsOrganized = this.organizeAtoms(products, productsNox);
         //
-
-        console.log(reagentsOrganized,productsOrganized);
-        console.log(reagentsNox,productsNox);
         
         const reagentsFormula = this.buildTheFormula(reagentsOrganized,reagentsNox);
         const productsFormula = this.buildTheFormula(productsOrganized,productsNox);
@@ -210,6 +209,11 @@ class ChemicalBalancing {
 
         return null;
     }
+    getNox(elem,atom) {
+        if(elem.length == atom.length) return "0"; // a key sendo 0 o js reconhece como invalido/null...
+        if(!this.NoxList[`${atom}`]) return "x";
+        return this.NoxList[`${atom}`];
+    }
 
     
     isThisAtomANumber(atom) {
@@ -218,7 +222,7 @@ class ChemicalBalancing {
     isUpperCase(caracter) {
         return caracter.replace(/[A-Z]/,"_isUpper_") == caracter ? false : true;
     }
-    insertMissingNox(reagents,products,missingNoxReag,missingNoxProd) {
+    insertMissingNox(reagents,products,missingNoxReag,missingNoxProd) { // encaixa os valores nos "x".
         reagents = Object.entries(reagents);
         products = Object.entries(products);
 
@@ -290,11 +294,6 @@ class ChemicalBalancing {
         console.log();
         console.log("-------------------------------------------------------------");
         console.log();
-    }
-    getNox(elem,atom) {
-        if(elem.length == atom.length) return "0"; // a key sendo 0 o js reconhece como invalido/null...
-        if(!this.NoxList[`${atom}`]) return "x";
-        return this.NoxList[`${atom}`];
     }
     getAtomIndex(group,elem,elemIndex,atom) { // Group --> Reagente / Produto.
         let index = -1;
@@ -395,16 +394,33 @@ class ChemicalBalancing {
         }).map(formula => `${formula.join("")}=0`); // mais para frente fazer atualizacao para o suporte de ion na formula
     }
     organizeAtoms(group,noxGroup) {
-        let groupOrganized = [];
+        let groupOrganized = [], timesThatAelemRepeatHimSelf = {};
 
-        Object.keys(noxGroup).forEach(atom => group.forEach(elem => { if(elem.includes(atom)) groupOrganized.push(elem) }));
+        Object.keys(noxGroup).forEach(atom => group.forEach(elem => {
+            if(elem.includes(atom)) groupOrganized.push(elem);
+        }));
         groupOrganized = groupOrganized.filter((val,idx,arr) => idx == arr.indexOf(val));
         
+        group.map(elem => timesThatAelemRepeatHimSelf[`${elem}`] = 0);
+        group.forEach(elem => timesThatAelemRepeatHimSelf[`${elem}`]++);
+
+        for(let i=0;i<groupOrganized.length;i++) {
+            const currentElem = groupOrganized[i];
+            const thisElemRepetition = timesThatAelemRepeatHimSelf[`${currentElem}`];
+
+            if(thisElemRepetition > 1) {
+                const elem = `+${currentElem}`.repeat(thisElemRepetition-1);
+                groupOrganized[i] = `${currentElem}${elem}`;
+            }
+        }
+
+        groupOrganized = groupOrganized.join("+").split("+");
+
         return groupOrganized;
     }
 }
 
-const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
+const firstQuestion = new ChemicalBalancing("NaClO3+NaClO3+NaClO4+H2SO4-->HClO4+ClO2+Na2SO4+H2O");
 firstQuestion.Handle();
  
 // C+HNO3-->CO2+NO2+H2O
@@ -414,15 +430,13 @@ firstQuestion.Handle();
 /*
 Contexto:
 
-Vai ser feito primeiro um script sem a opcao de fazer balanceamento com 2 atomos iguai no mesmo produto/reagente, depois que o script
-for testado, sera feito um update para o novo com esta opcao inclusa.
-
 -> observar o comportamento quando ha 2/mais elementos no mesmo grupo
 
     Anotacoes sobre:
         Erros:
             1 - Selecao de elemenros com mais de duas letras --> ✔.
             3 - "X" maior que 1. --> ✔
-            2 - Dois elementos no mesmo Reagente/Produto --> ...
+            2 - Dois elementos no mesmo Grupo --> X
             4 - nox dependentes de outros atomos. --> X
+            5 - Obedecer o valor posto por parenteses --> X
 */
