@@ -184,6 +184,7 @@ class ChemicalBalancing {
     }
     SolveSimpleEquations(equation) {
         equation = equation.split("=")[0];
+
         if(equation.includes("x")) {
             const operators = equation.split("").filter(caracter => caracter == "-" || caracter == "+");
             const eachEquationNum = equation.split(/\+|\-/).filter(e=>e!="");
@@ -193,7 +194,7 @@ class ChemicalBalancing {
             
             for(let i=0;i<eachEquationNum.length;i++) {
                 const operatorAndHisNumSTRING = `${operators[i]}${eachEquationNum[i]}`;
-    
+
                 if(operatorAndHisNumSTRING.includes("x")) {
                     operatorAndHisNumSTRING.split("").forEach(caracter => {
                         if(this.isThisAtomANumber(caracter)) numberFolledByX = Number(caracter); // no caso nao e um atom, porem vou usar assim mesmo. 
@@ -212,6 +213,8 @@ class ChemicalBalancing {
     getNox(elem,atom) {
         if(elem.length == atom.length) return "0"; // a key sendo 0 o js reconhece como invalido/null...
         if(!this.NoxList[`${atom}`]) return "x";
+        if(elem.includes("O") && atom == "S") return "x";
+
         return this.NoxList[`${atom}`];
     }
 
@@ -353,12 +356,14 @@ class ChemicalBalancing {
         return finalIndex;
     }
     buildTheFormula(group,groupNox) {
+        // funcionando, porem precisa de uma melhor identacao e logica, so nao faco isso agora pq estou deveras exalstoouss
+
         return group.map(elem => {
             const atoms = elem.split("");
             let formula = [];
-
+            // Consertar isso:
             for(let i=0;i<atoms.length;i++) {
-                const currentValue = atoms[i], nextValue = atoms[i+1];
+                const currentValue = atoms[i], nextValue = atoms[i+1], nextNextValue = atoms[i+2];
 
                 if(this.isUpperCase(currentValue) && !this.isThisAtomANumber(currentValue)) {
                     const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
@@ -366,21 +371,44 @@ class ChemicalBalancing {
 
                     if(typeof noxAtom == "object") {
                         const atomIndex = this.getAtomIndex(group,elem,i,atom);
-                        if(this.isThisAtomANumber(nextValue)) {
+
+                        if(this.isThisAtomANumber(nextValue) || this.isThisAtomANumber(nextNextValue)) {
+                            const numberMutiplingCalc = () => {
+                                if(this.isThisAtomANumber(nextValue)) return nextValue;
+                                if(atom.length > 1 && this.isThisAtomANumber(nextNextValue)) return nextNextValue;
+                                return 1;
+                            };
+                            const numberMutipling = numberMutiplingCalc();
+                            
+
                             if(noxAtom[atomIndex] == "x") {
-                                formula.push(`${nextValue}x`);
-                            } else formula.push(`${noxAtom[atomIndex]*nextValue}`);
-                                                 
+                                if(numberMutipling != 1) {
+                                    formula.push(`${numberMutipling}x`);
+                                } else formula.push("x");
+                            } else formula.push(`${noxAtom[atomIndex]*numberMutipling}`);
+
                         } else formula.push(`${noxAtom[atomIndex]}`);
+
                     } else {
-                        if(this.isThisAtomANumber(nextValue)) {
+                        if(this.isThisAtomANumber(nextValue) || this.isThisAtomANumber(nextNextValue)) {
+                            const numberMutiplingCalc = () => {
+                                if(this.isThisAtomANumber(nextValue)) return nextValue;
+                                if(atom.length > 1 && this.isThisAtomANumber(nextNextValue)) return nextNextValue;
+                                return 1;
+                            };
+                            const numberMutipling = numberMutiplingCalc();
+                            
                             if(noxAtom == "x") {
-                                formula.push(`${nextValue}x`);
-                            } else formula.push(`${noxAtom*nextValue}`);
-                                                 
+                                if(numberMutipling != 1) {
+                                    formula.push(`${numberMutipling}x`);
+                                } else formula.push("x");
+
+                            } else formula.push(`${noxAtom*numberMutipling}`);
+
                         } else formula.push(`${noxAtom}`);
                     }
-                };
+                    
+                }else{};
             }
 
             return formula;
@@ -393,7 +421,7 @@ class ChemicalBalancing {
             return newnoxValues;
         }).map(formula => `${formula.join("")}=0`); // mais para frente fazer atualizacao para o suporte de ion na formula
     }
-    organizeAtoms(group,noxGroup) {
+    organizeAtoms(group,noxGroup) { // organiza os elem para serem calculados, e seus resultados terem o mesmo index q seus keys; ex: [ OHCl2 ], { o:-2, h:+1, Cl:2x }
         let groupOrganized = [], timesThatAelemRepeatHimSelf = {};
 
         Object.keys(noxGroup).forEach(atom => group.forEach(elem => {
@@ -420,9 +448,11 @@ class ChemicalBalancing {
     }
 }
 
-const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
+const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O");
 firstQuestion.Handle();
- 
+
+
+
 // C+HNO3-->CO2+NO2+H2O
 // CClO3+H2HO4-->HClO4+ClO2+C3HO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
