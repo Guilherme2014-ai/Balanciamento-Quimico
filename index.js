@@ -223,7 +223,7 @@ class ChemicalBalancing {
         return !isNaN(Number(atom)+Number(atom));
     }
     isUpperCase(caracter) {
-        return caracter.replace(/[A-Z]/,"_isUpper_") == caracter ? false : true;
+        return caracter.replace(/[A-Z]/,"isUpper") == caracter ? false : true;
     }
     insertMissingNox(reagents,products,missingNoxReag,missingNoxProd) { // encaixa os valores nos "x".
         reagents = Object.entries(reagents);
@@ -303,7 +303,6 @@ class ChemicalBalancing {
         let finalIndex = -1;
 
         // Contexto
-        /*Nao terminado, resultados nao condizentes. O resultado aqui sera usado na funcao "NoxSolveds()"*/
         /*
             Como ?:
             o atom que tem repeticao ira apontar para uma Key com uma value do tipo array, a posicao do real nox do atom
@@ -368,41 +367,27 @@ class ChemicalBalancing {
                 if(this.isUpperCase(currentValue) && !this.isThisAtomANumber(currentValue)) {
                     const atom = nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue) ? `${currentValue}${nextValue}` : `${currentValue}`;
                     const noxAtom = groupNox[`${atom}`];
-
+                  
                     if(typeof noxAtom == "object") {
                         const atomIndex = this.getAtomIndex(group,elem,i,atom);
 
                         if(this.isThisAtomANumber(nextValue) || this.isThisAtomANumber(nextNextValue)) {
-                            const numberMutiplingCalc = () => {
-                                if(this.isThisAtomANumber(nextValue)) return nextValue;
-                                if(atom.length > 1 && this.isThisAtomANumber(nextNextValue)) return nextNextValue;
-                                return 1;
-                            };
-                            const numberMutipling = numberMutiplingCalc();
+                           const numberMutipling = this.isThisAtomANumber(nextNextValue) && !this.isUpperCase(nextValue) ? nextNextValue : nextValue;
                             
 
                             if(noxAtom[atomIndex] == "x") {
-                                if(numberMutipling != 1) {
-                                    formula.push(`${numberMutipling}x`);
-                                } else formula.push("x");
+                                formula.push(`${numberMutipling}x`);
                             } else formula.push(`${noxAtom[atomIndex]*numberMutipling}`);
 
                         } else formula.push(`${noxAtom[atomIndex]}`);
 
                     } else {
                         if(this.isThisAtomANumber(nextValue) || this.isThisAtomANumber(nextNextValue)) {
-                            const numberMutiplingCalc = () => {
-                                if(this.isThisAtomANumber(nextValue)) return nextValue;
-                                if(atom.length > 1 && this.isThisAtomANumber(nextNextValue)) return nextNextValue;
-                                return 1;
-                            };
-                            const numberMutipling = numberMutiplingCalc();
+                           const numberMutipling = this.isThisAtomANumber(nextNextValue) && !this.isUpperCase(nextValue) ? nextNextValue : nextValue;
                             
-                            if(noxAtom == "x") {
-                                if(numberMutipling != 1) {
-                                    formula.push(`${numberMutipling}x`);
-                                } else formula.push("x");
 
+                            if(noxAtom == "x") {
+                                formula.push(`${numberMutipling}x`);
                             } else formula.push(`${noxAtom*numberMutipling}`);
 
                         } else formula.push(`${noxAtom}`);
