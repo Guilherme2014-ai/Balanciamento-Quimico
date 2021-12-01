@@ -317,7 +317,7 @@ class ChemicalBalancing {
     }
 }
 
-const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
+const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O");
 firstQuestion.Handle();
 // Syntax Ex.: C+HNO3-->CO2+NO2+H2O
 // NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O
