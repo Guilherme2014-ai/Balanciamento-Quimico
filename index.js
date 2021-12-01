@@ -4,16 +4,6 @@
 // 4 Passo - Calcular o delta Nox de ambos.
 // 5 Passo - Substituir os Delta nox e fazer o metodo de tentativas.
 
-// Checkpoint atualizar a func. Insert MissingNox. --> ...
-// fazer mecanismo para calcular ordem de cada elemento.
-
-/*
-Problema atual, divergencia de ordem durante o encaixe dos "x"
-
-Como arrumar? --> ir na funcao que encaixa os "x" e falar para calcular o valor de cada um
-obdecendo a ordem da cada atom de acordo com o dado da func. "CalcAtomsAndThemNox()".
-*/
-
 class ChemicalBalancing {
 
     constructor(unbalancedEquation) {
@@ -49,8 +39,6 @@ class ChemicalBalancing {
     }
 
     Handle() {
-        console.log(this.reagents,this.products);
-
         const { reagentsAndThemNoxWithX, productsAndThemNoxWithNX } = this.CalcAtomsAndThemNox(); // Atribui todo os nox aos atomos de acordo com a tabela, caso nao esteja presente na tabela recebe "x".
         const { reagentsFormulaSolved, productsFormulaSolved } = this.NoxSolveds(reagentsAndThemNoxWithX,productsAndThemNoxWithNX); // Calcula os nox com "x", nox nao resolvidos, devolve um array com todos os valores calculados.
         const { reagentsAndThemNoxWithXComplete, productsAndThemNoxWithNXComplete } = this.insertMissingNox(reagentsAndThemNoxWithX,productsAndThemNoxWithNX,reagentsFormulaSolved,productsFormulaSolved); // substituir os "x" pelo valor.
@@ -67,15 +55,7 @@ class ChemicalBalancing {
     }
     
     CalcAtomsAndThemNox() {
-        const reagentsAndThemNoxWithX = {}, productsAndThemNoxWithNX = {}; // Syntax Expected: { C: 0, H: 1, N: 'x', O: -2 }
-        // this.reagents: [ 'C', 'HNO3' ] separado por "+"
-
-        /* OBS
-        quando o atomo se repete dentro do mesmo reagente/produto, e feito um array para armazenar os valores
-        conforme o planejado, oque resta e adpetar o resto do script para tal mudanca.\
-
-        - atualizar a func. q encaixa os Valores no X
-        */
+        const reagentsAndThemNoxWithX = {}, productsAndThemNoxWithNX = {};
 
         this.reagents.forEach(elem => {
             const eachAtom = elem.split("");
@@ -88,20 +68,17 @@ class ChemicalBalancing {
                     const atomNox = this.getNox(elem,atom);
 
                     if(reagentsAndThemNoxWithX[`${atom}`]) {
-                        if(typeof reagentsAndThemNoxWithX[`${atom}`] == "object") {
-                            reagentsAndThemNoxWithX[`${atom}`].push(atomNox);
-                        } else {
-                            const oldNox = reagentsAndThemNoxWithX[`${atom}`];
+                        if(typeof reagentsAndThemNoxWithX[`${atom}`] == "object") return reagentsAndThemNoxWithX[`${atom}`].push(atomNox);
+                            
+                        const oldNox = reagentsAndThemNoxWithX[`${atom}`];
 
-                            reagentsAndThemNoxWithX[`${atom}`] = [];
-
-                            reagentsAndThemNoxWithX[`${atom}`].push(oldNox);
-                            reagentsAndThemNoxWithX[`${atom}`].push(atomNox);
-                        }
+                        reagentsAndThemNoxWithX[`${atom}`] = [];
+                        reagentsAndThemNoxWithX[`${atom}`].push(oldNox);
+                        reagentsAndThemNoxWithX[`${atom}`].push(atomNox);
                     } else {
                         reagentsAndThemNoxWithX[`${atom}`] = atomNox;
                     }
-                }else{}
+                }
             }
         })
         this.products.forEach(elem => {
@@ -118,17 +95,13 @@ class ChemicalBalancing {
                     if(productsAndThemNoxWithNX[`${atom}`]) {
                         const oldNox = productsAndThemNoxWithNX[`${atom}`];
 
-                        if(typeof oldNox == "object") {
-                            productsAndThemNoxWithNX[`${atom}`].push(atomNox);
-                        } else {
-                            productsAndThemNoxWithNX[`${atom}`] = [];
+                        if(typeof oldNox == "object") return productsAndThemNoxWithNX[`${atom}`].push(atomNox);;
 
-                            productsAndThemNoxWithNX[`${atom}`].push(oldNox);
-                            productsAndThemNoxWithNX[`${atom}`].push(atomNox);
-                        }
-                    } else {
-                        productsAndThemNoxWithNX[`${atom}`] = atomNox;
-                    }
+                        productsAndThemNoxWithNX[`${atom}`] = [];
+                        productsAndThemNoxWithNX[`${atom}`].push(oldNox);
+                        productsAndThemNoxWithNX[`${atom}`].push(atomNox);
+
+                    } else productsAndThemNoxWithNX[`${atom}`] = atomNox;
                 }
             }
         })
@@ -156,23 +129,12 @@ class ChemicalBalancing {
             productsAndThemNoxWithNX: productsAndThemNoxWithNX_zeroBugSolved
         };
     }
-    NoxSolveds(reagentsNox, productsNox) { // parametros recebidos de "CalcAtomsAndThemNox()" // HERE
-        /*Contexto
-        Esta funcao monta a formula e devolve os nox resolvidos
-
-        Ja foi feito a alteracao dos nox em formato de array se necessario, e o metodo de localizacao do index de cada atom,
-        se nao fosse feito como saberia qual o nox pertencente a tal atom dentro do array ne ?
-
-        Oque precisa ser feito agr e calcular os nox"X" com os recursos acima.
-        */
-
+    NoxSolveds(reagentsNox, productsNox) { // parametros recebidos de "CalcAtomsAndThemNox()"
         const reagents = [ ...this.reagents ];
         const products = [ ...this.products ];
 
-        // ideia --> Por enquanto funcionando, ficar em observacao...
         const reagentsOrganized = this.organizeAtoms(reagents, reagentsNox);
         const productsOrganized = this.organizeAtoms(products, productsNox);
-        //
         
         const reagentsFormula = this.buildTheFormula(reagentsOrganized,reagentsNox);
         const productsFormula = this.buildTheFormula(productsOrganized,productsNox);
@@ -199,10 +161,7 @@ class ChemicalBalancing {
                     operatorAndHisNumSTRING.split("").forEach(caracter => {
                         if(this.isThisAtomANumber(caracter)) numberFolledByX = Number(caracter); // no caso nao e um atom, porem vou usar assim mesmo. 
                     });
-                } else {
-                    const operatorAndHisNumNUMBER = Number(operatorAndHisNumSTRING);
-                    equationNumbers.push(operatorAndHisNumNUMBER);
-                }
+                } else equationNumbers.push(Number(operatorAndHisNumSTRING));
             }
 
             return ((equationNumbers.reduce((accumulated, currentValue) => accumulated + currentValue)/numberFolledByX)*(-1));
@@ -232,7 +191,7 @@ class ChemicalBalancing {
         let reagentsNoxCounter=0, productsNoxCounter=0;
 
         const reagentsAndThemNoxWithXComplete = this.ArrayToJson(reagents.map(key_value => {
-            const [ key,value ] = key_value;
+            const value = key_value[1];
 
             if(typeof value == "object") {
                 key_value[1] = value.map(atomNox => {
@@ -254,7 +213,7 @@ class ChemicalBalancing {
             return key_value;
         }));
         const productsAndThemNoxWithNXComplete = this.ArrayToJson(products.map(key_value => {
-            const [ key,value ] = key_value;
+            const value = key_value[1];
 
             if(typeof value == "object") {
                 key_value[1] = value.map(atomNox => {
@@ -289,6 +248,7 @@ class ChemicalBalancing {
         return obj;
     }
     showResults(infos) {
+        console.log(this.reagents,this.products);
         console.log();
         console.log("-------------------------------------------------------------");
         console.log(`Main Data
@@ -318,7 +278,7 @@ class ChemicalBalancing {
                     const currentValue = eachAtom[i];
                     const nextValue = eachAtom[i+1];
     
-                    if(this.isUpperCase(currentValue) && this.isThisAtomANumber(currentValue) === false) {
+                    if(this.isUpperCase(currentValue) && !this.isThisAtomANumber(currentValue)) {
                         if(nextValue && !this.isUpperCase(nextValue) && !this.isThisAtomANumber(nextValue)) {
                             const _atom = `${currentValue}${nextValue}`;
                             if(_atom === atom) {
@@ -393,7 +353,7 @@ class ChemicalBalancing {
                         } else formula.push(`${noxAtom}`);
                     }
                     
-                }else{};
+                };
             }
 
             return formula;
@@ -433,9 +393,8 @@ class ChemicalBalancing {
     }
 }
 
-const firstQuestion = new ChemicalBalancing("NaClO3+H2SO4-->HClO4+ClO2+Na2SO4+H2O");
+const firstQuestion = new ChemicalBalancing("C+HNO3-->CO2+NO2+H2O");
 firstQuestion.Handle();
-
 
 
 // C+HNO3-->CO2+NO2+H2O
