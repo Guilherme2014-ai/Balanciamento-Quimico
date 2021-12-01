@@ -65,7 +65,7 @@ class ChemicalBalancing {
             productsAndThemNoxWithNXComplete
         ]);
     }
-     
+    
     CalcAtomsAndThemNox() {
         const reagentsAndThemNoxWithX = {}, productsAndThemNoxWithNX = {}; // Syntax Expected: { C: 0, H: 1, N: 'x', O: -2 }
         // this.reagents: [ 'C', 'HNO3' ] separado por "+"
